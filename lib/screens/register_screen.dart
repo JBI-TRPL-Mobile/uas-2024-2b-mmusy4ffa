@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../controllers/register_controller.dart';
+import 'package:provider/provider.dart';
+import '../controllers/auth_controller.dart';
+import '../providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -10,18 +12,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
-  final RegisterController _registerController = RegisterController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: Text('Register')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -39,6 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24.0),
+            // Full Name Field
             TextField(
               controller: _fullNameController,
               decoration: InputDecoration(
@@ -50,6 +51,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             const SizedBox(height: 16.0),
+            // Username Field
+            TextField(
+              controller: _usernameController,
+              decoration: InputDecoration(
+                labelText: 'Username',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                prefixIcon: const Icon(Icons.account_circle),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            // Email Field
             TextField(
               controller: _emailController,
               decoration: InputDecoration(
@@ -62,6 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16.0),
+            // Password Field
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(
@@ -72,9 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _isPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
+                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                   ),
                   onPressed: () {
                     setState(() {
@@ -86,6 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               obscureText: !_isPasswordVisible,
             ),
             const SizedBox(height: 16.0),
+            // Confirm Password Field
             TextField(
               controller: _confirmPasswordController,
               decoration: InputDecoration(
@@ -110,73 +124,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
               obscureText: !_isConfirmPasswordVisible,
             ),
             const SizedBox(height: 24.0),
+            // Register Button
             ElevatedButton(
               onPressed: () {
-                String fullName = _fullNameController.text;
-                String email = _emailController.text;
-                String password = _passwordController.text;
-                String confirmPassword = _confirmPasswordController.text;
+                final fullName = _fullNameController.text;
+                final username = _usernameController.text;
+                final email = _emailController.text;
+                final password = _passwordController.text;
+                final confirmPassword = _confirmPasswordController.text;
 
-                _registerController.registerUser(
+                // Menggunakan controller untuk registrasi
+                final authController = AuthController();
+                authController.register(
+                  context,
                   fullName,
+                  username,
                   email,
                   password,
                   confirmPassword,
-                  context,
+                  Provider.of<AuthProvider>(context, listen: false),
                 );
               },
-              child: Text('Sign Up'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                minimumSize: Size(double.infinity, 50),
+              ),
+              child: Text('Register'),
             ),
             const SizedBox(height: 16.0),
-            Text(
-              'or sign in with',
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.normal),
-            ),
-            const SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.login, size: 40),
-                  iconSize: 40.0,
-                  onPressed: () {
-                    print('Login with Google');
-                  },
-                ),
-                const SizedBox(width: 20.0),
-                IconButton(
-                  icon: Icon(Icons.facebook, size: 40),
-                  iconSize: 40.0,
-                  onPressed: () {
-                    print('Login with Facebook');
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 24.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Already have an account? ",
-                  style: TextStyle(fontSize: 14.0),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    'Sign In Now',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),

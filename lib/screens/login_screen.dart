@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../controllers/login_controller.dart';
+import 'package:provider/provider.dart';
+import '../controllers/auth_controller.dart';
+import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -7,56 +9,59 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final LoginController loginController = LoginController();
-
+  final TextEditingController _usernameOrEmailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
+      appBar: AppBar(
+        title: Text('Login'),
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Title Section
             Column(
               children: [
                 Text(
                   'Sign In',
                   style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(
-                  height: 16.0,
-                ),
+                SizedBox(height: 16.0),
                 Text(
-                  'Selamat Datang Kembali\nSilahkan Login untuk masuk ke Dashboard',
-                  style:
-                      TextStyle(fontSize: 14.0, fontWeight: FontWeight.normal),
+                  'Silahkan Login untuk masuk ke Dashboard',
+                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.normal),
                   textAlign: TextAlign.center,
                 ),
               ],
             ),
             const SizedBox(height: 32.0),
+
+            // Username or Email Field
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Enter Email',
+                'Enter Email or Username',
                 style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 8.0),
             TextField(
-              controller: loginController.emailController,
+              controller: _usernameOrEmailController,
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Username or Email',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                prefixIcon: const Icon(Icons.email),
+                prefixIcon: const Icon(Icons.person),
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16.0),
+
+            // Password Field
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -65,58 +70,45 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 8.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: loginController.passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    prefixIcon: const Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                    ),
-                  ),
-                  obscureText: !_isPasswordVisible,
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                const SizedBox(height: 8.0),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () {
-                      print("Forgot Password tapped");
-                      Navigator.pushNamed(context, '/resetPassword');
-                    },
-                    child: Text(
-                      'Forgot Password?',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 14.0,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                   ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
                 ),
-              ],
+              ),
+              obscureText: !_isPasswordVisible,
             ),
-            const SizedBox(height: 24.0),
+            const SizedBox(height: 8.0),
+
+            // Login Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  loginController.login();
+                  final usernameOrEmail = _usernameOrEmailController.text;
+                  final password = _passwordController.text;
+
+                  // Menggunakan controller untuk melakukan login
+                  final authController = AuthController();
+                  authController.login(
+                    context,
+                    usernameOrEmail,
+                    password,
+                    Provider.of<AuthProvider>(context, listen: false),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -124,33 +116,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: const Text('Sign In'),
               ),
             ),
-            const SizedBox(height: 16.0),
-            Text(
-              'or sign in with',
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.normal),
-            ),
-            const SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.login, size: 40),
-                  iconSize: 40.0,
-                  onPressed: () {
-                    print('Login with Google');
-                  },
-                ),
-                const SizedBox(width: 20.0),
-                IconButton(
-                  icon: Icon(Icons.facebook, size: 40),
-                  iconSize: 40.0,
-                  onPressed: () {
-                    print('Login with Facebook');
-                  },
-                ),
-              ],
-            ),
             const SizedBox(height: 24.0),
+
+            // Sign Up Link
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
